@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "es2021",
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@useCases/*": ["./src/useCases/*"],
+      "@repositories/*": ["./src/repositories/*"],
+      "@middlewares/*": ["./src/middlewares/*"],
+      "@prismaProvider/*": ["./src/prisma/*"],
+      "@utils/*": ["./src/utils/*"]
+    }
+  }
+}

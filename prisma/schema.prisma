@@ -1,0 +1,191 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  roleId BigInt @id @map("cargo_id")
+  role   String @map("cargo")
+
+  @@map("cargo")
+}
+
+model Client {
+  id                 BigInt           @id @default(autoincrement()) @map("cliente_id")
+  name               String?          @map("nome")
+  cpf                String?          @map("cpf")
+  phone              String?          @map("telefone")
+  email              String?          @map("email")
+  address            String?          @map("endereco")
+  rg                 String?          @map("rg")
+  stateRegistration  String?          @map("inscricao_stadual")
+  countyRegistration String?          @map("inscricao_municipal")
+  personType         String?          @map("tipo_pessoa")
+  OrderOfService     OrderOfService[]
+
+  @@map("cliente")
+}
+
+model ClientAddress {
+  cliente_endereco_cliente_id BigInt
+  clientAddressIdAddressId    BigInt  @map("cliente_endereco_endereco_id")
+  defaultAddress              Boolean @map("default")
+  clientAddressId             BigInt  @id @default(autoincrement()) @map("cliente_endereco_id")
+
+  @@map("cliente_endereco")
+}
+
+model Address {
+  addressId    BigInt   @id(map: "Endereco_pkey") @default(autoincrement()) @map("endereco_id")
+  publicPlace  String   @map("logradouro")
+  cep          String?  @map("cep")
+  neighborhood String   @map("bairro")
+  number       String   @map("numero")
+  complement   String?  @map("complemento")
+  deleteFlag   Boolean? @default(false) @map("flag_delete")
+
+  @@map("endereco")
+}
+
+model Equipment {
+  id             BigInt    @id(map: "garantia_pkey") @default(autoincrement())
+  serviceOrderId BigInt    @map("ordem_servico_id")
+  brand          String?   @map("marca")
+  model          String?   @map("modelo")
+  equipment      String?   @map("equipamento")
+  term           DateTime? @map("prazo") @db.Timestamp(6)
+  monthsWarranty BigInt?   @default(0) @map("meses_garantia")
+
+  @@map("equipamento")
+}
+
+model Employee {
+  id               BigInt         @id @default(autoincrement()) @map("funcionario_id")
+  name             String         @map("nome")
+  cpf              String         @map("cpf")
+  email            String         @map("email")
+  phone            String         @map("telefone")
+  dateOfBirth      DateTime       @map("data_de_nascimento") @db.Timestamp(6)
+  entryDate        DateTime       @map("data_de_entrada") @db.Timestamp(6)
+  departureDate    DateTime?      @map("data_de_saida") @db.Timestamp(6)
+  roleId           BigInt         @map("cargo_id")
+  addressId        BigInt?        @map("endereco_id")
+  avatarUrl        String?        @map("avatar_url")
+  employeeStatus   EmployeeStatus @relation(fields: [employeeStatusId], references: [id])
+  employeeStatusId BigInt         @unique @map("funcionario_status_id")
+  deleteFlag       Boolean?       @default(false) @map("flag_delete")
+  user             User?
+
+  @@map("funcionario")
+}
+
+model EmployeeStatus {
+  id       BigInt    @id(map: "usuario_status_pkey") @map("funcionario_status_id")
+  status   String?
+  employee Employee?
+
+  @@map("funcionario_status")
+}
+
+model OrderOfService {
+  id                    BigInt    @id @default(autoincrement())
+  client                Client    @relation(fields: [clientId], references: [id])
+  clientId              BigInt    @map("cliente_id")
+  createdBy             BigInt    @map("criado_por")
+  osStatus              BigInt    @map("os_status")
+  publicPlace           String    @map("logradouro")
+  cep                   String?   @map("cep")
+  number                String    @map("numero")
+  neighborhood          String    @map("bairro")
+  complement            String?   @map("complemento")
+  observation           String?   @map("observacao")
+  equipmentsQuantity    String?   @map("aparelhos_qtd")
+  pieceSold             Boolean?  @map("peca_vendida")
+  defect                String?   @map("defeito")
+  customerPiece         Boolean?  @map("cliente_peca")
+  technicianId          BigInt?   @map("tecnico_id")
+  serviceExecuted       String?   @map("servico_executado")
+  creationDate          DateTime  @map("data_de_criacao") @db.Timestamp(6)
+  paymentDate           DateTime? @map("data_pagamento") @db.Timestamp(6)
+  absence1              DateTime? @map("ausencia_1") @db.Timestamptz(6)
+  absence2              DateTime? @map("ausencia_2") @db.Timestamptz(6)
+  amountReceived        Decimal?  @map("valor_recebido") @db.Money
+  budget                Decimal?  @map("orcamento") @db.Money
+  servicePeriod         String?   @map("periodo_atendimento")
+  appointmentScheduling DateTime? @map("agendamento_atendimento") @db.Timestamp(6)
+  absenceObs            String?   @map("ausencia_obs")
+  paymentForm           String?   @map("forma_pagamento")
+  visitFee              Decimal?  @map("taxa_visita") @db.Money
+  specifications        String[]  @map("especificacoes")
+
+  @@map("ordem_de_servico")
+}
+
+model OrderOfServiceStatus {
+  id     BigInt @id
+  status String
+
+  @@map("ordem_servico_status")
+}
+
+model Part {
+  id               BigInt   @id @default(autoincrement())
+  name             String?  @map("nome")
+  code             String?  @map("codigo")
+  quantity         String?  @map("quantidade")
+  observations     String?  @map("obs")
+  replacement      Boolean? @map("troca")
+  orderOfServiceId BigInt?  @map("ordem_servico_id")
+  unitaryValue     Decimal? @map("valor_unitario") @db.Money
+  amount           Decimal? @map("valor_total") @db.Money
+  equipmentId      String?  @map("equipamento_id")
+
+  @@map("peca")
+}
+
+model TokenType {
+  tokenTypeId BigInt  @id @map("token_tipo_id")
+  type        String? @map("tipo")
+
+  @@map("token_tipo")
+}
+
+model User {
+  id               BigInt    @id @default(autoincrement()) @map("usuario_id")
+  employee         Employee  @relation(fields: [employeeId], references: [id])
+  employeeId       BigInt    @unique @map("funcionario_id")
+  activationDate   DateTime? @map("data_de_ativacao") @db.Timestamp(6)
+  deactivationDate DateTime? @map("data_de_desativacao") @db.Timestamp(6)
+  username         String?   @map("nome_de_usuario")
+  password         String?   @map("senha")
+
+  @@map("usuario")
+}
+
+model usuario_token {
+  usuario_token_id Int       @id @default(autoincrement())
+  usuario_id       Int
+  token            String?
+  token_tipo_id    Int
+  data_expiracao   DateTime  @db.Timestamp(6)
+  data_de_uso      DateTime? @db.Timestamp(6)
+
+  @@index([data_de_uso], map: "user_token date_of_use")
+  @@index([data_expiracao], map: "user_token expiration_date")
+  @@index([usuario_id], map: "user_token user_id")
+  @@index([token_tipo_id], map: "user_token_token_type_id")
+  @@map("usuario_token")
+}
+
+model visita_garantia {
+  id              BigInt    @id @default(autoincrement())
+  serviceExecuted String?   @map("servico_executado")
+  customerPiece   Boolean?  @map("cliente_peca")
+  technicianId    BigInt?   @map("tecnico_id")
+  visitDate       DateTime? @map("data_visita") @db.Timestamp(6)
+  equipmentId     BigInt?   @map("equipamento_id")
+}
